@@ -7,7 +7,11 @@
 {% block body %}
 
     <h1>Error</h1>
-    <p>The requested page was not found</p>
+    {% if not_found %}
+        <p>The requested page was not found</p>
+    {% elif exists %}
+        <p>Page Already Exists</p>
+    {% endif %}
     
 
 {% endblock %}
