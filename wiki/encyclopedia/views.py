@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django import forms
 import markdown2
 import os
+from random import randint
 
 from . import util
 
@@ -33,8 +34,6 @@ def entry(request, title):
                     os.rename(f"entries/{title}.md", f"entries/{newTitle}.md")
                     with open(f"entries/{newTitle}.md", "w") as file:
                         file.write(newText)
-                    
-                    print(f"\n\n\n new title is {newTitle}")
                     return HttpResponseRedirect(newTitle)
             return render(request, "encyclopedia/edit.html", {
                 "title": title,
@@ -93,4 +92,7 @@ def new(request):
         "form": NewEntryForm()
     })
 
-
+def random(request):
+    entries = util.list_entries()
+    idx = randint(0, (len(entries) - 1))
+    return HttpResponseRedirect(f"../wiki/{entries[idx]}")
