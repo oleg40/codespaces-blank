@@ -91,8 +91,7 @@ def new(request):
                     "exists": exists,
                     "name": title
                 })
-            with open(f"entries/{title}.md", "w") as file:
-                file.write(text)
+            util.save_entry(title, text)
             return HttpResponseRedirect(reverse('new'))
 
     return render(request, "encyclopedia/new.html", {
