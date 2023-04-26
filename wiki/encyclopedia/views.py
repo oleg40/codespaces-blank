@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django import forms
 import markdown2
+import os
 
 from . import util
 
@@ -13,8 +14,31 @@ def index(request):
     })
 
 def entry(request, title):
+
     if util.get_entry(title):
-        content = markdown2.markdown(util.get_entry(title))
+        content = util.get_entry(title)
+        if request.GET.get("edit") == "true":
+            class EditForm(forms.Form):
+                editTitle = forms.CharField(label="Title")
+                editText = forms.CharField(widget=forms.Textarea, label="Text")
+            emptyForm = EditForm(initial={
+                "editTitle": title,
+                "editText": content
+            })
+            if request.method == "POST":
+                filledForm = EditForm(request.POST)
+                if filledForm.is_valid():
+                    newTitle = filledForm.cleaned_data["editTitle"]
+                    newText = filledForm.cleaned_data["editText"]
+                    os.rename(f"entries/{title}.md", f"entries/{newTitle}.md")
+                    with open(f"entries/{newTitle}.md", "w") as file:
+                        file.write(newText)
+                    return HttpResponseRedirect(f"wiki/{newTitle}")
+            return render(request, "encyclopedia/edit.html", {
+                "title": title,
+                "form": emptyForm
+        })
+        content = markdown2.markdown(content)
         return render(request, "encyclopedia/entry.html", {
             "title": title,
             "content": content
@@ -23,7 +47,7 @@ def entry(request, title):
     return render(request, "encyclopedia/error.html", {
         "not_found": not_found
     })
-    
+   
 def search(request):
     query = request.GET.get('q')
     if query:
@@ -55,10 +79,12 @@ def new(request):
                 return render(request, "encyclopedia/error.html", {
                     "exists": exists
                 })
-            with open(f"entries/{title}.md", "w") as f:
-                f.write(text)
+            with open(f"entries/{title}.md", "w") as file:
+                file.write(text)
             return HttpResponseRedirect(reverse('new'))
 
     return render(request, "encyclopedia/new.html", {
         "form": NewEntryForm()
     })
+
+
