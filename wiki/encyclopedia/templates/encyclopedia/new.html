@@ -8,7 +8,7 @@
 <h1>Create New Page</h1> <br>
 
 <div id="newEntry">
-<form action="{% url 'new' %}", method="post">
+<form action="{% url 'new' %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Save">

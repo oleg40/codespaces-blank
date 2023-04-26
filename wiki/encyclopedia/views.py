@@ -33,16 +33,22 @@ def entry(request, title):
                     os.rename(f"entries/{title}.md", f"entries/{newTitle}.md")
                     with open(f"entries/{newTitle}.md", "w") as file:
                         file.write(newText)
-                    return HttpResponseRedirect(f"wiki/{newTitle}")
+                    
+                    print(f"\n\n\n new title is {newTitle}")
+                    return HttpResponseRedirect(newTitle)
             return render(request, "encyclopedia/edit.html", {
                 "title": title,
                 "form": emptyForm
         })
+
+        # if entry was found
         content = markdown2.markdown(content)
         return render(request, "encyclopedia/entry.html", {
             "title": title,
             "content": content
         })
+    
+    # if entry was not found
     not_found = True
     return render(request, "encyclopedia/error.html", {
         "not_found": not_found
