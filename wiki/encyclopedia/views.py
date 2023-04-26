@@ -20,27 +20,17 @@ def entry(request, title):
         content = util.get_entry(title)
         if request.GET.get("edit") == "true":
             class EditForm(forms.Form):
-                editTitle = forms.CharField(label="Title")
                 editText = forms.CharField(widget=forms.Textarea, label="Text")
             emptyForm = EditForm(initial={
-                "editTitle": title,
                 "editText": content
             })
             if request.method == "POST":
                 filledForm = EditForm(request.POST)
                 if filledForm.is_valid():
-                    newTitle = filledForm.cleaned_data["editTitle"]
                     newText = filledForm.cleaned_data["editText"]
-                    if os.path.exists(f"entries/{newTitle}.md") and title != newTitle:
-                        exists = True
-                        return render(request, "encyclopedia/error.html", {
-                        "exists": exists,
-                        "name": " " + newTitle + " "
-                    })
-                    os.rename(f"entries/{title}.md", f"entries/{newTitle}.md")
-                    with open(f"entries/{newTitle}.md", "w") as file:
+                    with open(f"entries/{title}.md", "w") as file:
                         file.write(newText)
-                    return HttpResponseRedirect(newTitle)
+                    return HttpResponseRedirect(title)
             return render(request, "encyclopedia/edit.html", {
                 "title": title,
                 "form": emptyForm
@@ -92,7 +82,7 @@ def new(request):
                     "name": title
                 })
             util.save_entry(title, text)
-            return HttpResponseRedirect(reverse('new'))
+            return HttpResponseRedirect(f"wiki/{title}")
 
     return render(request, "encyclopedia/new.html", {
         "form": NewEntryForm()
