@@ -31,6 +31,12 @@ def entry(request, title):
                 if filledForm.is_valid():
                     newTitle = filledForm.cleaned_data["editTitle"]
                     newText = filledForm.cleaned_data["editText"]
+                    if os.path.exists(f"entries/{newTitle}.md") and title != newTitle:
+                        exists = True
+                        return render(request, "encyclopedia/error.html", {
+                        "exists": exists,
+                        "name": " " + newTitle + " "
+                    })
                     os.rename(f"entries/{title}.md", f"entries/{newTitle}.md")
                     with open(f"entries/{newTitle}.md", "w") as file:
                         file.write(newText)
@@ -82,7 +88,8 @@ def new(request):
             if title in util.list_entries():
                 exists = True
                 return render(request, "encyclopedia/error.html", {
-                    "exists": exists
+                    "exists": exists,
+                    "name": title
                 })
             with open(f"entries/{title}.md", "w") as file:
                 file.write(text)
